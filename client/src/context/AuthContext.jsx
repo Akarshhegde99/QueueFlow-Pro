@@ -8,7 +8,17 @@ export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(() => localStorage.getItem('token'));
     const [loading, setLoading] = useState(true);
 
+    const getApiUrl = (path = '') => {
+        const baseUrl = import.meta.env.VITE_API_URL || '';
+        const cleanBase = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+        if (!path) return cleanBase;
+        const cleanPath = path.startsWith('/') ? path : `/${path}`;
+        return `${cleanBase}${cleanPath}`;
+    };
+
     useEffect(() => {
+        axios.defaults.baseURL = getApiUrl();
+
         if (token) {
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             localStorage.setItem('token', token);
@@ -28,21 +38,26 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password, role) => {
         try {
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/login`, { email, password, role });
+            console.log('Attempting login to:', getApiUrl('/api/auth/login'));
+            const res = await axios.post('/api/auth/login', { email, password, role });
             setToken(res.data.token);
             setUser(res.data.user);
             return { success: true };
         } catch (err) {
-            return { success: false, message: err.response?.data?.message || 'Login failed' };
+            console.error('Login Error:', err);
+            const message = err.response?.data?.message || (err.request ? 'Server not responding (Network Error)' : 'Login failed');
+            return { success: false, message };
         }
     };
 
     const register = async (userData) => {
         try {
-            await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/register`, userData);
+            await axios.post('/api/auth/register', userData);
             return { success: true };
         } catch (err) {
-            return { success: false, message: err.response?.data?.message || 'Registration failed' };
+            console.error('Registration Error:', err);
+            const message = err.response?.data?.message || (err.request ? 'Server not responding (Network Error)' : 'Registration failed');
+            return { success: false, message };
         }
     };
 
@@ -55,7 +70,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, login, register, logout, loading }}>
+        <AuthContext.Provider value={{ user, token, login, register, logout, loading, getApiUrl }}>
             {children}
         </AuthContext.Provider>
     );

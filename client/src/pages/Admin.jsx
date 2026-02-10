@@ -55,7 +55,7 @@ const Admin = () => {
 
     const fetchRecentVerifications = async () => {
         try {
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/passes`);
+            const res = await axios.get('/api/passes');
             const completed = res.data
                 .filter(p => p.status === 'completed')
                 .sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt))
@@ -71,7 +71,7 @@ const Admin = () => {
         setError('');
         setLoading(true);
         try {
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/passes/verify`, { qrToken: decodedText });
+            const res = await axios.post('/api/passes/verify', { qrToken: decodedText });
             setPassDetails(res.data);
             setApprovalCode(res.data.approvalCode);
         } catch (err) {
@@ -106,7 +106,7 @@ const Admin = () => {
         setLoading(true);
         setError('');
         try {
-            await axios.post(`${import.meta.env.VITE_API_URL}/api/passes/approve`, {
+            await axios.post('/api/passes/approve', {
                 passId: passDetails.passId,
                 code: userInputCode
             });

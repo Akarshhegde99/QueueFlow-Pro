@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { io } from 'socket.io-client';
 
 const Dashboard = () => {
-    const { user } = useAuth();
+    const { user, getApiUrl } = useAuth();
     const [passes, setPasses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
@@ -22,7 +22,8 @@ const Dashboard = () => {
     }, [copiedId]);
 
     useEffect(() => {
-        const newSocket = io(import.meta.env.VITE_API_URL);
+        const socketUrl = getApiUrl();
+        const newSocket = io(socketUrl);
         setSocket(newSocket);
         newSocket.emit('join', user.id);
         newSocket.on('passUpdate', (updatedPass) => {
@@ -37,7 +38,7 @@ const Dashboard = () => {
 
     const fetchPasses = async () => {
         try {
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/passes/mine`);
+            const res = await axios.get('/api/passes/mine');
             setPasses(res.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
         } catch (err) {
             console.error('Error fetching passes:', err);
@@ -50,7 +51,7 @@ const Dashboard = () => {
     const handleCreatePass = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/passes`, newPass);
+            const res = await axios.post('/api/passes', newPass);
             setPasses([res.data, ...passes]);
             setShowModal(false);
             setNewPass({ purpose: '', type: 'standard' });
@@ -62,7 +63,7 @@ const Dashboard = () => {
     const handleDropPass = async (passId) => {
         if (!window.confirm('Are you sure you want to drop this pass?')) return;
         try {
-            await axios.delete(`${import.meta.env.VITE_API_URL}/api/passes/${passId}`);
+            await axios.delete(`/api/passes/${passId}`);
             setPasses(prev => prev.filter(p => p.id !== passId));
         } catch (err) {
             alert(err.response?.data?.message || 'Error dropping pass');

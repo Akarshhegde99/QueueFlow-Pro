@@ -38,7 +38,13 @@ Follow these steps to deploy your application for free on **Render.com**.
     *   **Publish Directory**: `dist`
 4.  Add the following **Environment Variable**:
     *   `VITE_API_URL`: (Paste the Backend URL you copied in Step 1)
-5.  Click **Create Static Site**.
+5.  **Critical Fix for Refresh Errors**:
+    *   In your Render Dashboard for this Static Site, click on **Redirects/Rewrites**.
+    *   Click **Add Rule**.
+    *   **Source Path**: `/*`
+    *   **Destination Path**: `/index.html`
+    *   **Action**: `Rewrite`
+6.  Click **Create Static Site**.
 
 ---
 

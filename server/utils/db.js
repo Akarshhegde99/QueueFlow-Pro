@@ -3,6 +3,11 @@ const path = require('path');
 
 const DATA_DIR = path.join(__dirname, '../data');
 
+// Ensure data directory exists
+if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+}
+
 const readData = (filename) => {
     const filePath = path.join(DATA_DIR, `${filename}.json`);
     if (!fs.existsSync(filePath)) {

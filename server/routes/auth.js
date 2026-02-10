@@ -56,16 +56,21 @@ router.post('/login', async (req, res) => {
         const users = readData('users');
 
         // 1. Precise Identification
-        const dbUser = users.find(u => u.email.toLowerCase() === normalizedEmail);
-        const isSystemAdminEmail = normalizedEmail === process.env.ADMIN_EMAIL?.toLowerCase();
+        const systemAdminEmail = (process.env.ADMIN_EMAIL || '').trim().toLowerCase();
+        const isSystemAdminEmail = normalizedEmail === systemAdminEmail;
+        const systemAdminPassword = (process.env.ADMIN_PASSWORD || '').trim();
 
         // Determine account's true role
         let registeredRole = null;
+        const dbUser = users.find(u => u.email.toLowerCase() === normalizedEmail);
+
         if (dbUser) {
             registeredRole = dbUser.role;
         } else if (isSystemAdminEmail) {
             registeredRole = 'admin';
         }
+
+        console.log(`Login attempt for ${normalizedEmail} as ${role}. Account role: ${registeredRole}`);
 
         // Account doesn't exist
         if (!registeredRole) {
@@ -90,7 +95,7 @@ router.post('/login', async (req, res) => {
         }
 
         // Environmental override (fallback or for .env only admins)
-        if (!authenticatedUser && isSystemAdminEmail && password === process.env.ADMIN_PASSWORD) {
+        if (!authenticatedUser && isSystemAdminEmail && password === systemAdminPassword) {
             authenticatedUser = {
                 id: 'system-admin',
                 name: 'System Admin',

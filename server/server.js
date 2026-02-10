@@ -46,6 +46,11 @@ app.use((req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/passes', passRoutes);
 
+// Health Check for Render
+app.get('/health', (req, res) => {
+    res.status(200).send('OK');
+});
+
 // Error Handling
 app.use((err, req, res, next) => {
     console.error(err.stack);
@@ -53,6 +58,6 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
 });
